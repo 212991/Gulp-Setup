@@ -1,14 +1,30 @@
 //onderdelen inporteren
 const gulp = require('gulp');
 var sass = require('gulp-sass');
+var sourcemaps = require('gulp-sourcemaps');
+var browserSync = require('browser-sync');
 
 sass.compiler = require('node-sass');
+
+// Static Server + watching scss/html files
+gulp.task('serve', ['scss'], function() {
+
+  browserSync.init({
+    server: "./"
+  });
+
+  gulp.watch('./gulp/scss/**/*.scss', ['scss']);
+  gulp.watch("*.html").on('change', browserSync.reload);
+});
 
 // taak aanmaken
 gulp.task('scss', function(){
 return gulp.src('./gulp/scss/**/*.scss')
+.pipe(sourcemaps.init())
 .pipe(sass().on('error', sass.logError))
-.pipe(gulp.dest('./dist'));
+.pipe(sourcemaps.write('./map'))
+.pipe(gulp.dest('./dist'))
+.pipe(browserSync.stream());
 });
 
 gulp.task('watch', function () {
@@ -16,4 +32,4 @@ gulp.task('watch', function () {
 });
 
 // standaard taak instellen
-gulp.task('default',['scss','watch']);
+gulp.task('default',['scss','serve']);
